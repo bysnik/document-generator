@@ -57,7 +57,7 @@ pip install flask docxtpl python-docx pandas openpyxl
 ```bash
 # Обновление системы
 apt-get update
-apt-get upgrade
+apt-get dist-upgrade
 
 # Установка Python 3 и необходимых пакетов
 apt-get install python3 git
