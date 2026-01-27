@@ -1,3 +1,3 @@
 # document-generator
 
-Зависимости: flask docxtpl python-docx
+Зависимости: flask docxtpl python-docx pandas openpyxl
