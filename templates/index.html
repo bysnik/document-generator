@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Генератор программ модулей</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f8f9fa; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center; }
+        h1 { text-align: center; color: #333; margin-bottom: 40px; }
+        .btn { display: inline-block; padding: 15px 30px; background: #0066cc; color: white; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; margin: 10px; }
+        .btn:hover { background: #0052a3; transform: translateY(-2px); }
+        .btn-batch { background: #28a745; }
+        .btn-batch:hover { background: #218838; }
+        .fields-list { max-height: 200px; overflow-y: auto; background: #f1f3f5; padding: 15px; border-radius: 6px; margin-top: 20px; font-family: monospace; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>🎓 Генератор рабочих программ модулей</h1>
+
+    <div class="card">
+        <h2>Одиночная генерация</h2>
+        <p>Заполните форму вручную для создания одного документа</p>
+        <a href="/single" class="btn">Перейти к форме</a>
+    </div>
+
+    <div class="card">
+        <h2>Пакетная генерация</h2>
+        <p>Загрузите CSV/XLSX файл — каждая строка станет отдельным документом</p>
+        <a href="/batch" class="btn btn-batch">Загрузить таблицу</a>
+    </div>
+
+    <div class="card">
+        <h3>Названия колонок для таблицы:</h3>
+        <div class="fields-list">
+            {% for field in fields %}
+            • {{ field }}<br>
+            {% endfor %}
+        </div>
+        <p style="margin-top: 15px;">
+            <a href="/example-csv" class="btn" style="background:#6c757d; padding:8px 15px; font-size:14px;">Скачать шаблон CSV</a>
+            <a href="/example-xlsx" class="btn" style="background:#6c757d; padding:8px 15px; font-size:14px;">Скачать шаблон XLSX</a>
+        </p>
+    </div>
+</body>
+</html>
