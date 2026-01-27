@@ -165,8 +165,8 @@ cd                            # Windows
 
 **Решение:**
 ```bash
-pip install -r requirements.txt      # Windows
-pip3 install -r requirements.txt     # Linux
+pip install flask docxtpl python-docx pandas openpyxl     # Windows
+pip3 install flask docxtpl python-docx pandas openpyxl    # Linux
 ```
 
 ### Ошибка: `Port 5000 is already in use`
