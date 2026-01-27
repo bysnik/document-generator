@@ -5,6 +5,7 @@ import pandas as pd
 import zipfile
 from datetime import datetime
 import io
+import uuid
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -97,7 +98,7 @@ def generate_and_download(context, prefix='program'):
     doc = DocxTemplate('template.docx')
     doc.render(context)
 
-    filename = f"{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    filename = f"{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     filepath = os.path.join(app.config['GENERATED_FOLDER'], filename)
     doc.save(filepath)
 
