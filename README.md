@@ -202,7 +202,7 @@ project/
 ├── app.py                    # Основное приложение Flask
 ├── template.docx             # Шаблон документа с плейсхолдерами
 ├── README.md                 # Документация
-├── .gitignore               # Исключения для Git
+├── .gitignore                # Исключения для Git
 └── templates/                # HTML-шаблоны
     ├── index.html
     ├── single.html
