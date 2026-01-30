@@ -3,7 +3,7 @@ from docxtpl import DocxTemplate
 import os
 import pandas as pd
 import zipfile
-from datetime import datetime, timedelta
+from datetime import datetime
 import io
 import uuid
 
@@ -43,26 +43,9 @@ TEMPLATE_FIELDS = [
     ('field_of_study', 'Область техники'),
 ]
 
-def cleanup_old_files():
-    """Очистка файлов старше 1 часа"""
-    now = datetime.now()
-    for folder in [app.config['UPLOAD_FOLDER'], app.config['GENERATED_FOLDER']]:
-        if os.path.exists(folder):
-            for fname in os.listdir(folder):
-                fpath = os.path.join(folder, fname)
-                if os.path.isfile(fpath):
-                    mtime = datetime.fromtimestamp(os.path.getmtime(fpath))
-                    if (now - mtime) > timedelta(hours=1):
-                        try:
-                            os.remove(fpath)
-                            print(f"🧹 Удалён старый файл: {fname}")
-                        except Exception as e:
-                            print(f"⚠️ Не удалось удалить {fname}: {e}")
-
 @app.route('/')
 def index():
     """Главная страница"""
-    cleanup_old_files()
     return render_template('index.html', fields=TEMPLATE_FIELDS)
 
 @app.route('/single', methods=['GET', 'POST'])
@@ -211,5 +194,6 @@ if __name__ == '__main__':
     print("🚀 Запуск приложения...")
     print(f"📁 Папка загрузок: {app.config['UPLOAD_FOLDER']}")
     print(f"📁 Папка результатов: {app.config['GENERATED_FOLDER']}")
+    print("💾 Все сгенерированные файлы сохраняются на сервере")
     print("=" * 60)
     app.run(debug=True)
