@@ -126,10 +126,14 @@ def batch():
             <a href="/example-xlsx" style="color:#0066cc;">Скачать пример шаблона XLSX</a>
             ''', 400
 
-        zip_buffer = io.BytesIO()
+        # Генерируем имя архива
+        archive_name = f'batch_programs_{len(df)}docs_{timestamp}.zip'
+        archive_path = os.path.join(app.config['GENERATED_FOLDER'], archive_name)
+        
         success_count = 0
         
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Создаём архив на диске
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for idx, row in df.iterrows():
                 try:
                     context = {field: str(row[field]) if pd.notna(row[field]) else '' for field in field_names}
@@ -148,12 +152,10 @@ def batch():
                     print(f"⚠️ Ошибка при генерации документа {idx+1}: {e}")
 
         os.remove(filepath)
-        zip_buffer.seek(0)
-
-        archive_name = f'batch_programs_{success_count}docs_{timestamp}.zip'
         
+        # Отправляем архив пользователю
         return send_file(
-            zip_buffer,
+            archive_path,
             mimetype='application/zip',
             as_attachment=True,
             download_name=archive_name
