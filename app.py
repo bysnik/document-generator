@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file, redirect, url_for, abort
 from docxtpl import DocxTemplate
 import os
 import pandas as pd
@@ -43,6 +43,25 @@ TEMPLATE_FIELDS = [
     ('field_of_study', 'Область техники'),
 ]
 
+# Обработчик ошибки 400
+@app.errorhandler(400)
+def bad_request(error):
+    """Страница ошибки 400"""
+    error_message = getattr(error, 'description', 'Некорректный запрос')
+    return render_template('error_400.html', error_message=error_message), 400
+
+# Обработчик ошибки 404
+@app.errorhandler(404)
+def not_found(error):
+    """Страница ошибки 404"""
+    return render_template('error_404.html'), 404
+
+# Обработчик ошибки 500
+@app.errorhandler(500)
+def internal_error(error):
+    """Страница ошибки 500"""
+    return render_template('error_500.html'), 500
+
 @app.route('/')
 def index():
     """Главная страница"""
@@ -81,22 +100,22 @@ def single_download(filename):
     filepath = os.path.join(app.config['GENERATED_FOLDER'], filename)
     if os.path.exists(filepath):
         return send_file(filepath, as_attachment=True, download_name=filename)
-    return 'Файл не найден', 404
+    abort(404)
 
 @app.route('/batch', methods=['GET', 'POST'])
 def batch():
     """Пакетная генерация"""
     if request.method == 'POST':
         if 'file' not in request.files:
-            return '❌ Файл не загружен', 400
+            abort(400, description='❌ Файл не загружен')
 
         file = request.files['file']
         if file.filename == '':
-            return '❌ Файл не выбран', 400
+            abort(400, description='❌ Файл не выбран')
 
         ext = os.path.splitext(file.filename)[1].lower()
         if ext not in ['.csv', '.xlsx', '.xls']:
-            return '❌ Неподдерживаемый формат файла. Используйте CSV или XLSX', 400
+            abort(400, description='❌ Неподдерживаемый формат файла. Используйте CSV или XLSX')
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         unique_id = uuid.uuid4().hex[:8]
@@ -112,7 +131,7 @@ def batch():
                 df = pd.read_excel(filepath)
         except Exception as e:
             os.remove(filepath)
-            return f'❌ Ошибка чтения файла: {str(e)}<br><br>Проверьте формат файла и кодировку.', 400
+            abort(400, description=f'❌ Ошибка чтения файла: {str(e)}<br><br>Проверьте формат файла и кодировку.')
 
         # Извлекаем только технические названия полей
         field_names = [field for field, _ in TEMPLATE_FIELDS]
@@ -120,16 +139,16 @@ def batch():
         missing = set(field_names) - set(df.columns)
         if missing:
             os.remove(filepath)
-            return f'''
+            abort(400, description=f'''
             ❌ В файле отсутствуют обязательные колонки:<br>
             <strong>{", ".join(sorted(missing))}</strong><br><br>
             
             Доступные колонки в файле:<br>
             {", ".join(sorted(df.columns))}<br><br>
             
-            <a href="/example-csv" style="color:#0066cc;">Скачать пример шаблона CSV</a> | 
-            <a href="/example-xlsx" style="color:#0066cc;">Скачать пример шаблона XLSX</a>
-            ''', 400
+            <a href="/example-csv" style="color:#3498db; text-decoration:underline;">Скачать пример шаблона CSV</a> | 
+            <a href="/example-xlsx" style="color:#3498db; text-decoration:underline;">Скачать пример шаблона XLSX</a>
+            ''')
 
         # Генерируем имя архива
         archive_name = f'batch_programs_{len(df)}docs_{timestamp}.zip'

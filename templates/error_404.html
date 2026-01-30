@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Ошибка 404 - Страница не найдена</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .error-icon {
+            font-size: 120px;
+            color: #f39c12;
+            margin-bottom: 20px;
+        }
+        
+        .error-code {
+            font-size: 80px;
+            font-weight: 700;
+            color: #34495e;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+        }
+        
+        .error-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .home-btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .home-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+        
+        .home-btn i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .tech-details {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 14px;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🔍</div>
+        <div class="error-code">404</div>
+        <div class="error-title">Страница не найдена</div>
+        <div class="error-message">
+            К сожалению, запрашиваемая страница не существует.<br>
+            Возможно, она была удалена или перемещена.
+        </div>
+        <a href="/" class="home-btn">
+            <i>🏠</i> Вернуться на главную
+        </a>
+        <div class="tech-details">
+            Error 404 • Page Not Found
+        </div>
+    </div>
+</body>
+</html>
