@@ -10,22 +10,41 @@ import uuid
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['GENERATED_FOLDER'] = 'generated'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Ограничение: 16 МБ
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['GENERATED_FOLDER'], exist_ok=True)
 
-# Все поля шаблона
+# Основные поля шаблона с человекочитаемыми названиями
 TEMPLATE_FIELDS = [
-    'college_name', 'commission_name', 'approval_position', 'approval_signature',
-    'approval_date', 'module_code', 'module_name', 'specialty_code', 'specialty_name',
-    'year', 'fgos_specialty_code', 'fgos_date', 'fgos_order', 'example_program_date',
-    'example_program_order', 'study_plan_date', 'pck_protocol_number', 'pck_protocol_date',
-    'pck_chair', 'employer_position', 'employer_signature', 'method_council_protocol',
-    'developer_name', 'developer_category', 'field_of_study'
+    ('college_name', 'Название колледжа'),
+    ('commission_name', 'Название цикловой комиссии'),
+    ('approval_position', 'Должность утверждающего'),
+    ('approval_signature', 'ФИО утверждающего (подпись)'),
+    ('approval_date', 'Дата утверждения'),
+    ('module_code', 'Код модуля (ПМ.01)'),
+    ('module_name', 'Название модуля'),
+    ('specialty_code', 'Код специальности (09.02.06)'),
+    ('specialty_name', 'Название специальности'),
+    ('year', 'Год разработки программы'),
+    ('fgos_specialty_code', 'Код специальности в ФГОС'),
+    ('fgos_date', 'Дата приказа ФГОС'),
+    ('fgos_order', 'Номер приказа ФГОС'),
+    ('example_program_date', 'Дата примерной программы'),
+    ('example_program_order', 'Номер приказа примерной программы'),
+    ('study_plan_date', 'Дата утверждения учебного плана'),
+    ('pck_protocol_number', 'Номер протокола ПЦК'),
+    ('pck_protocol_date', 'Дата протокола ПЦК'),
+    ('pck_chair', 'Председатель ПЦК (ФИО)'),
+    ('employer_position', 'Должность представителя работодателя'),
+    ('employer_signature', 'ФИО представителя работодателя'),
+    ('method_council_protocol', 'Протокол методического совета'),
+    ('developer_name', 'ФИО разработчика'),
+    ('developer_category', 'Категория разработчика'),
+    ('field_of_study', 'Область техники'),
 ]
 
-# Очистка старых файлов (каждый раз при запуске)
 def cleanup_old_files():
+    """Очистка файлов старше 1 часа"""
     now = datetime.now()
     for folder in [app.config['UPLOAD_FOLDER'], app.config['GENERATED_FOLDER']]:
         if os.path.exists(folder):
@@ -42,18 +61,26 @@ def cleanup_old_files():
 
 @app.route('/')
 def index():
-    cleanup_old_files()  # Очищаем старые файлы при открытии главной страницы
+    """Главная страница"""
+    cleanup_old_files()
     return render_template('index.html', fields=TEMPLATE_FIELDS)
 
 @app.route('/single', methods=['GET', 'POST'])
 def single():
+    """Одиночная генерация"""
     if request.method == 'POST':
-        context = {field: request.form.get(field, '') for field in TEMPLATE_FIELDS}
+        # Собираем данные из формы
+        context = {}
+        for field, _ in TEMPLATE_FIELDS:
+            context[field] = request.form.get(field, '')
+        
         return generate_and_download(context, prefix='program')
+    
     return render_template('single.html', fields=TEMPLATE_FIELDS)
 
 @app.route('/batch', methods=['GET', 'POST'])
 def batch():
+    """Пакетная генерация"""
     if request.method == 'POST':
         if 'file' not in request.files:
             return '❌ Файл не загружен', 400
@@ -62,21 +89,17 @@ def batch():
         if file.filename == '':
             return '❌ Файл не выбран', 400
 
-        # Проверяем расширение
         ext = os.path.splitext(file.filename)[1].lower()
         if ext not in ['.csv', '.xlsx', '.xls']:
             return '❌ Неподдерживаемый формат файла. Используйте CSV или XLSX', 400
 
-        # Генерируем уникальное имя для сохранения
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         unique_id = uuid.uuid4().hex[:8]
         filename = f"batch_{unique_id}_{timestamp}{ext}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
-        # Сохраняем файл
         file.save(filepath)
 
-        # Читаем данные
         try:
             if ext == '.csv':
                 df = pd.read_csv(filepath, encoding='utf-8-sig')
@@ -86,11 +109,12 @@ def batch():
             os.remove(filepath)
             return f'❌ Ошибка чтения файла: {str(e)}<br><br>Проверьте формат файла и кодировку.', 400
 
-        # Проверяем наличие всех нужных колонок
-        missing = set(TEMPLATE_FIELDS) - set(df.columns)
+        # Извлекаем только технические названия полей
+        field_names = [field for field, _ in TEMPLATE_FIELDS]
+        
+        missing = set(field_names) - set(df.columns)
         if missing:
             os.remove(filepath)
-            available = set(df.columns) - set(TEMPLATE_FIELDS)
             return f'''
             ❌ В файле отсутствуют обязательные колонки:<br>
             <strong>{", ".join(sorted(missing))}</strong><br><br>
@@ -102,22 +126,18 @@ def batch():
             <a href="/example-xlsx" style="color:#0066cc;">Скачать пример шаблона XLSX</a>
             ''', 400
 
-        # Генерируем документы
         zip_buffer = io.BytesIO()
         success_count = 0
-        error_count = 0
         
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for idx, row in df.iterrows():
                 try:
-                    context = {field: str(row[field]) if pd.notna(row[field]) else '' for field in TEMPLATE_FIELDS}
+                    context = {field: str(row[field]) if pd.notna(row[field]) else '' for field in field_names}
 
-                    # Генерируем имя файла
                     filename_base = f"{context['module_code'].replace('.', '_')}_{context['specialty_code']}_{idx+1}"
                     doc = DocxTemplate('template.docx')
                     doc.render(context)
 
-                    # Сохраняем в архив
                     doc_buffer = io.BytesIO()
                     doc.save(doc_buffer)
                     doc_buffer.seek(0)
@@ -125,15 +145,11 @@ def batch():
                     zipf.writestr(f"{filename_base}.docx", doc_buffer.read())
                     success_count += 1
                 except Exception as e:
-                    error_count += 1
                     print(f"⚠️ Ошибка при генерации документа {idx+1}: {e}")
 
-        # Удаляем временный файл
         os.remove(filepath)
-        
         zip_buffer.seek(0)
 
-        # Формируем имя архива
         archive_name = f'batch_programs_{success_count}docs_{timestamp}.zip'
         
         return send_file(
@@ -146,6 +162,7 @@ def batch():
     return render_template('batch.html', fields=TEMPLATE_FIELDS)
 
 def generate_and_download(context, prefix='program'):
+    """Генерация и скачивание одного документа"""
     doc = DocxTemplate('template.docx')
     doc.render(context)
 
@@ -158,7 +175,9 @@ def generate_and_download(context, prefix='program'):
 @app.route('/example-csv')
 def example_csv():
     """Генерирует пример CSV для скачивания"""
-    example = pd.DataFrame([{field: f"Пример_{field}" for field in TEMPLATE_FIELDS}])
+    # Извлекаем только технические названия полей
+    field_names = [field for field, _ in TEMPLATE_FIELDS]
+    example = pd.DataFrame([{field: f"Пример_{field}" for field in field_names}])
     buffer = io.BytesIO()
     example.to_csv(buffer, index=False, encoding='utf-8-sig')
     buffer.seek(0)
@@ -172,7 +191,9 @@ def example_csv():
 @app.route('/example-xlsx')
 def example_xlsx():
     """Генерирует пример XLSX для скачивания"""
-    example = pd.DataFrame([{field: f"Пример_{field}" for field in TEMPLATE_FIELDS}])
+    # Извлекаем только технические названия полей
+    field_names = [field for field, _ in TEMPLATE_FIELDS]
+    example = pd.DataFrame([{field: f"Пример_{field}" for field in field_names}])
     buffer = io.BytesIO()
     example.to_excel(buffer, index=False, engine='openpyxl')
     buffer.seek(0)

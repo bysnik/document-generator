@@ -4,31 +4,158 @@
     <meta charset="utf-8">
     <title>Одиночная генерация</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; }
-        .form-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .field { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 12px 24px; background: #0066cc; color: white; border: none; font-size: 16px; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0052a3; }
-        .back { display: inline-block; margin-bottom: 20px; color: #0066cc; text-decoration: none; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 1000px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: #f5f7fa;
+        }
+        .form-container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+        .field { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        .field-name {
+            color: #3498db;
+            font-weight: 600;
+        }
+        .field-code {
+            color: #7f8c8d;
+            font-weight: 400;
+            font-size: 13px;
+            margin-left: 5px;
+        }
+        input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            box-sizing: border-box; 
+            border: 2px solid #e1e5eb; 
+            border-radius: 6px; 
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #3498db; 
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        input:required:invalid {
+            border-color: #e74c3c;
+        }
+        button { 
+            padding: 14px 28px; 
+            background: linear-gradient(135deg, #3498db, #2980b9); 
+            color: white; 
+            border: none; 
+            font-size: 18px; 
+            font-weight: 600;
+            cursor: pointer; 
+            border-radius: 8px; 
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .back { 
+            display: inline-block; 
+            margin-bottom: 25px; 
+            color: #3498db; 
+            text-decoration: none; 
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .back:hover {
+            background: #f8f9fa;
+            color: #2980b9;
+        }
+        .section-title {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 30px 0 20px 0;
+            border-left: 4px solid #3498db;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        .required-note {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <a href="/" class="back">← Назад к выбору режима</a>
+    
     <div class="form-container">
-        <h1>Одиночная генерация документа</h1>
-        <form method="POST" action="/single">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                {% for field in fields %}
+        <h1 style="color: #2c3e50; margin-bottom: 10px;">📝 Одиночная генерация документа</h1>
+        <p class="required-note">* Поля, отмеченные звёздочкой, обязательны для заполнения</p>
+        
+        <form method="POST" action="/single" id="singleForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                {% for field, human_name in fields %}
                 <div class="field">
-                    <label for="{{ field }}">{{ field }}</label>
+                    <label for="{{ field }}">
+                        <span class="field-name">{{ human_name }}</span>
+                        <span class="field-code">({{ field }})</span>
+                    </label>
                     <input type="text" id="{{ field }}" name="{{ field }}" required>
                 </div>
                 {% endfor %}
             </div>
-            <button type="submit" style="width: 100%; margin-top: 20px;">Сгенерировать DOCX</button>
+            
+            <button type="submit" id="submitBtn">💾 Сгенерировать документ</button>
         </form>
     </div>
+
+    <script>
+        // Показываем индикатор загрузки при отправке формы
+        document.getElementById('singleForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Генерация документа...';
+        });
+
+        // Подсветка текущего поля
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.backgroundColor = '#f8f9ff';
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.style.backgroundColor = '';
+            });
+        });
+    </script>
 </body>
 </html>

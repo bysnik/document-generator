@@ -4,65 +4,361 @@
     <meta charset="utf-8">
     <title>Пакетная генерация</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-        .form-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #28a745; margin-bottom: 30px; }
-        .upload-area { border: 3px dashed #28a745; padding: 60px; border-radius: 10px; background: #f8fff8; margin: 30px 0; cursor: pointer; }
-        .upload-area p { color: #666; font-size: 18px; margin: 0; }
-        .upload-area:hover { background: #f0fff0; border-color: #218838; }
-        .file-info { background: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left; display: none; }
-        .file-info h3 { margin: 0 0 10px 0; color: #0066cc; }
-        .file-info p { margin: 5px 0; font-size: 14px; }
-        .btn-change { color: #dc3545; text-decoration: underline; cursor: pointer; font-size: 14px; background: none; border: none; padding: 0; }
-        .btn-change:hover { color: #c82333; }
-        .btn-upload { display: inline-block; padding: 15px 40px; background: #28a745; color: white; border-radius: 6px; font-size: 18px; cursor: pointer; margin-top: 20px; border: none; }
-        .btn-upload:hover { background: #218838; }
-        .btn-generate { display: inline-block; padding: 15px 40px; background: #0066cc; color: white; border-radius: 6px; font-size: 18px; cursor: pointer; width: 100%; margin-top: 10px; border: none; }
-        .btn-generate:hover { background: #0052a3; }
-        .btn-generate:disabled { background: #ccc; cursor: not-allowed; }
-        .back { display: inline-block; margin-bottom: 20px; color: #0066cc; text-decoration: none; }
-        .requirements { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 30px; text-align: left; font-size: 14px; }
-        .requirements h3 { margin-top: 0; color: #555; }
-        .hidden { display: none; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: #f5f7fa;
+        }
+        .form-container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            text-align: center; 
+        }
+        h1 { 
+            color: #28a745; 
+            margin-bottom: 30px; 
+            font-size: 28px; 
+        }
+        
+        /* Область загрузки */
+        .upload-area { 
+            border: 3px dashed #28a745; 
+            padding: 60px; 
+            border-radius: 12px; 
+            background: #f8fff8; 
+            margin: 30px 0; 
+            cursor: pointer; 
+            transition: all 0.3s;
+        }
+        .upload-area:hover { 
+            background: #f0fff0; 
+            border-color: #218838; 
+        }
+        
+        /* Информация о файле */
+        .file-info { 
+            background: #e7f3ff; 
+            padding: 25px; 
+            border-radius: 10px; 
+            margin: 25px 0; 
+            text-align: left; 
+            display: none; 
+            border-left: 4px solid #3498db;
+        }
+        .file-info h3 { 
+            margin: 0 0 15px 0; 
+            color: #2c3e50; 
+            font-size: 20px; 
+            display: flex;
+            align-items: center;
+        }
+        .file-info h3 i { 
+            margin-right: 10px; 
+            color: #27ae60; 
+            font-size: 24px;
+        }
+        .file-info p { 
+            margin: 8px 0; 
+            font-size: 15px; 
+            color: #2c3e50;
+        }
+        .file-info strong { 
+            color: #3498db; 
+        }
+        .btn-change { 
+            color: #e74c3c; 
+            text-decoration: underline; 
+            cursor: pointer; 
+            font-size: 14px; 
+            background: none; 
+            border: none; 
+            padding: 8px 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .btn-change:hover { 
+            color: #c0392b; 
+            background: #f8f9fa;
+        }
+        
+        /* Кнопки */
+        .btn { 
+            display: inline-block; 
+            padding: 15px 40px; 
+            color: white; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: 600;
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        .btn-upload { 
+            background: linear-gradient(135deg, #28a745, #218838); 
+        }
+        .btn-upload:hover { 
+            background: linear-gradient(135deg, #218838, #1e7e34); 
+        }
+        .btn-generate { 
+            background: linear-gradient(135deg, #3498db, #2980b9); 
+            width: 100%; 
+            margin-top: 15px; 
+        }
+        .btn-generate:hover { 
+            background: linear-gradient(135deg, #2980b9, #2573a7); 
+        }
+        .btn-generate:disabled { 
+            background: #bdc3c7; 
+            cursor: not-allowed; 
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Ссылки навигации */
+        .back { 
+            display: inline-block; 
+            margin-bottom: 25px; 
+            color: #3498db; 
+            text-decoration: none; 
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .back:hover {
+            background: #f8f9fa;
+            color: #2980b9;
+        }
+        
+        /* Требования к файлу */
+        .requirements {
+            background: #e7f3ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+            border-left: 4px solid #3498db;
+        }
+        .requirements h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        .requirements ul {
+            margin: 15px 0 0 0;
+            padding-left: 25px;
+        }
+        .requirements li {
+            margin: 8px 0;
+            color: #2c3e50;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .requirements strong {
+            color: #3498db;
+        }
+        
+        /* Аккордеон - шпаргалка полей */
+        .accordion {
+            width: 100%;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .accordion-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 16px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 17px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .accordion-header:hover {
+            background: #e9ecef;
+            color: #3498db;
+        }
+        
+        .accordion-header::after {
+            content: '+';
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+            transition: transform 0.3s;
+        }
+        
+        .accordion-header.active::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        
+        .accordion-content.active {
+            max-height: 1000px;
+        }
+        
+        .accordion-inner {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .fields-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .field-card {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .field-card:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .field-human {
+            color: #2c3e50;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .field-code {
+            color: #7f8c8d;
+            font-weight: 400;
+            font-size: 13px;
+            margin-left: 15px;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e1e5eb;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .tip-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .tip-box strong {
+            color: #856404;
+        }
+        
+        .hidden { 
+            display: none; 
+        }
     </style>
 </head>
 <body>
     <a href="/" class="back">← Назад к выбору режима</a>
+    
     <div class="form-container">
         <h1>📁 Пакетная генерация документов</h1>
 
         <form method="POST" action="/batch" enctype="multipart/form-data" id="upload-form">
-            <!-- Область загрузки (показывается по умолчанию) -->
+            <!-- Область загрузки -->
             <div class="upload-area" id="upload-area">
-                <p>📁 Перетащите CSV или XLSX файл сюда</p>
-                <p style="font-size:14px; color:#888; margin-top:10px;">Или</p>
-                <button type="button" class="btn-upload" id="select-file-btn">Выбрать файл</button>
+                <p style="font-size: 20px; font-weight: 600;">📁 Перетащите CSV или XLSX файл сюда</p>
+                <p style="font-size: 14px; color: #7f8c8d; margin-top: 10px;">Или</p>
+                <button type="button" class="btn btn-upload" id="select-file-btn">Выбрать файл</button>
                 <input type="file" id="file-input" name="file" accept=".csv,.xlsx,.xls" style="display:none;">
             </div>
 
-            <!-- Информация о загруженном файле (скрыта по умолчанию) -->
+            <!-- Информация о загруженном файле -->
             <div class="file-info" id="file-info">
-                <h3>✅ Файл загружен</h3>
+                <h3>
+                    <span>✅ Файл загружен</span>
+                </h3>
                 <p><strong>Название:</strong> <span id="file-name">-</span></p>
                 <p><strong>Размер:</strong> <span id="file-size">-</span></p>
                 <p><strong>Формат:</strong> <span id="file-type">-</span></p>
-                <button type="button" class="btn-change" id="change-file-btn">Загрузить другую таблицу</button>
+                <button type="button" class="btn-change" id="change-file-btn">🔄 Загрузить другую таблицу</button>
             </div>
 
             <!-- Кнопка генерации -->
-            <button type="submit" class="btn-generate" id="generate-btn" disabled>
+            <button type="submit" class="btn btn-generate" id="generate-btn" disabled>
                 🚀 Сгенерировать пакет документов
             </button>
         </form>
 
+        <!-- Требования к файлу (возвращён!) -->
         <div class="requirements">
             <h3>📋 Требования к файлу:</h3>
             <ul>
                 <li>Первая строка — заголовки колонок (должны совпадать с названиями полей)</li>
                 <li>Каждая строка = один документ</li>
                 <li>Поддерживаются форматы: <strong>.csv</strong>, <strong>.xlsx</strong>, <strong>.xls</strong></li>
-                <li><a href="/example-csv" style="color:#0066cc;">Скачать шаблон CSV</a> | <a href="/example-xlsx" style="color:#0066cc;">Скачать шаблон XLSX</a></li>
+                <li>Рекомендуется кодировка: <strong>UTF-8</strong></li>
+                <li><a href="/example-csv" style="color:#3498db; text-decoration:underline;">Скачать шаблон CSV</a> | <a href="/example-xlsx" style="color:#3498db; text-decoration:underline;">Скачать шаблон XLSX</a></li>
             </ul>
+        </div>
+
+        <!-- Аккордеон с шпаргалкой полей -->
+        <div class="accordion">
+            <div class="accordion-header" id="accordion-header">
+                📋 Список полей шаблона (шпаргалка для CSV/XLSX)
+            </div>
+            <div class="accordion-content" id="accordion-content">
+                <div class="accordion-inner">
+                    <div class="fields-grid">
+                        {% for field, human_name in fields %}
+                        <div class="field-card">
+                            <span class="field-human">{{ human_name }}</span>
+                            <span class="field-code">{{ field }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="tip-box">
+                        <strong>💡 Совет:</strong> При пакетной генерации используйте эти названия как заголовки колонок в CSV/XLSX файле. Первая строка файла должна содержать именно эти названия полей.
+                    </div>
+                    <p style="margin-top: 15px; text-align: center;">
+                        <a href="/example-csv" class="btn" style="background: #3498db; padding: 8px 20px; font-size: 14px; margin-right: 10px; display: inline-block;">📥 Скачать шаблон CSV</a>
+                        <a href="/example-xlsx" class="btn" style="background: #27ae60; padding: 8px 20px; font-size: 14px; display: inline-block;">📥 Скачать шаблон XLSX</a>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -75,6 +371,16 @@
         const fileType = document.getElementById('file-type');
         const generateBtn = document.getElementById('generate-btn');
         const changeFileBtn = document.getElementById('change-file-btn');
+        
+        // Аккордеон
+        const accordionHeader = document.getElementById('accordion-header');
+        const accordionContent = document.getElementById('accordion-content');
+
+        // Переключение аккордеона
+        accordionHeader.addEventListener('click', () => {
+            accordionHeader.classList.toggle('active');
+            accordionContent.classList.toggle('active');
+        });
 
         // Клик по кнопке "Выбрать файл"
         document.getElementById('select-file-btn').addEventListener('click', () => {
