@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Документ сгенерирован</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 800px; 
+            margin: 40px auto; 
+            padding: 20px; 
+            background: #f5f7fa;
+        }
+        .result-container { 
+            background: white; 
+            padding: 50px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 80px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        h1 { 
+            color: #27ae60; 
+            margin-bottom: 10px; 
+            font-size: 32px;
+        }
+        p { 
+            color: #7f8c8d; 
+            font-size: 18px; 
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .download-btn { 
+            display: inline-block; 
+            padding: 16px 40px; 
+            background: linear-gradient(135deg, #3498db, #2980b9); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .download-btn:hover { 
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+        .download-btn i { 
+            margin-right: 10px; 
+            font-size: 20px;
+        }
+        .new-btn { 
+            display: inline-block; 
+            padding: 16px 40px; 
+            background: linear-gradient(135deg, #27ae60, #219653); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+        .new-btn:hover { 
+            background: linear-gradient(135deg, #219653, #1e8449);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+        }
+        .new-btn i { 
+            margin-right: 10px; 
+            font-size: 20px;
+        }
+        .back { 
+            display: inline-block; 
+            margin-bottom: 25px; 
+            color: #3498db; 
+            text-decoration: none; 
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .back:hover {
+            background: #f8f9fa;
+            color: #2980b9;
+        }
+        .file-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .file-info p {
+            margin: 8px 0;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        .file-info strong {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back">← Назад к выбору режима</a>
+    
+    <div class="result-container">
+        <div class="success-icon">✅</div>
+        <h1>Документ успешно сгенерирован!</h1>
+        <p>Ваш документ готов к скачиванию. Вы можете скачать его сейчас или вернуться к форме для создания нового документа.</p>
+        
+        <div class="file-info">
+            <p><strong>📁 Название файла:</strong> {{ filename }}</p>
+            <p><strong>📅 Дата создания:</strong> {{ filename.split('_')[-2] }} {{ filename.split('_')[-1].split('.')[0] }}</p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ url_for('single_download', filename=filename) }}" class="download-btn">
+                <i>⬇️</i> Скачать документ
+            </a>
+            <a href="{{ url_for('single') }}" class="new-btn">
+                <i>🔄</i> Очистить поля и начать заново
+            </a>
+        </div>
+    </div>
+</body>
+</html>

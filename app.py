@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect, url_for
 from docxtpl import DocxTemplate
 import os
 import pandas as pd
@@ -57,9 +57,31 @@ def single():
         for field, _ in TEMPLATE_FIELDS:
             context[field] = request.form.get(field, '')
         
-        return generate_and_download(context, prefix='program')
+        # Генерируем и сохраняем документ
+        filename = f"program_{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+        filepath = os.path.join(app.config['GENERATED_FOLDER'], filename)
+        
+        doc = DocxTemplate('template.docx')
+        doc.render(context)
+        doc.save(filepath)
+        
+        # Перенаправляем на страницу результата
+        return redirect(url_for('single_result', filename=filename))
     
     return render_template('single.html', fields=TEMPLATE_FIELDS)
+
+@app.route('/single/result/<filename>')
+def single_result(filename):
+    """Страница результата генерации"""
+    return render_template('single_result.html', filename=filename)
+
+@app.route('/single/download/<filename>')
+def single_download(filename):
+    """Скачивание сгенерированного документа"""
+    filepath = os.path.join(app.config['GENERATED_FOLDER'], filename)
+    if os.path.exists(filepath):
+        return send_file(filepath, as_attachment=True, download_name=filename)
+    return 'Файл не найден', 404
 
 @app.route('/batch', methods=['GET', 'POST'])
 def batch():
@@ -145,17 +167,6 @@ def batch():
         )
 
     return render_template('batch.html', fields=TEMPLATE_FIELDS)
-
-def generate_and_download(context, prefix='program'):
-    """Генерация и скачивание одного документа"""
-    doc = DocxTemplate('template.docx')
-    doc.render(context)
-
-    filename = f"{prefix}_{uuid.uuid4().hex}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-    filepath = os.path.join(app.config['GENERATED_FOLDER'], filename)
-    doc.save(filepath)
-
-    return send_file(filepath, as_attachment=True, download_name=filename)
 
 @app.route('/example-csv')
 def example_csv():
