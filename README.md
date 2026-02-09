@@ -235,5 +235,8 @@ project/
     ├── index.html
     ├── single.html
     ├── batch.html
-    └── table_format.html
+    ├── table_format.html
+    ├── error_400.html
+    ├── error_404.html
+    └── error_500.html
 ```
